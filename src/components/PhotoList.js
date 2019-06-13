@@ -10,7 +10,11 @@ const PhotoList = ({ photos }) => {
     return <PhotoItem key={image.id} image={image} />;
   });
 
-  return <div className="image-list">{images}</div>;
+  return (
+    <div className="ui placeholder segment">
+      <div className="image-list">{images}</div>
+    </div>
+  );
 };
 
 const mapStateToProps = state => {
