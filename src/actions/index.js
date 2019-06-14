@@ -3,7 +3,10 @@ import jsonYelp from "../api/jsonYelp";
 
 export const storeLocationInFavorites = location => (dispatch, getState) => {
   if (getState().favorites.some(e => e.id === location.id)) {
-    console.log("Location Already Exists in Favorites");
+    dispatch({
+      type: "REMOVE_FAVORITE",
+      payload: location
+    });
   } else {
     dispatch({
       type: "STORE_FAVORITE",
