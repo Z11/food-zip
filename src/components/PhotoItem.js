@@ -18,7 +18,7 @@ class PhotoItem extends React.Component {
       <div style={{ gridRowEnd: `span ${this.state.spans}` }}>
         <img
           ref={this.imageRef}
-          height="300"
+          height="275"
           alt=""
           src={this.props.image.photo_url}
         />

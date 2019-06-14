@@ -8,13 +8,16 @@ const LocationReviews = ({ reviews }) => {
       <div className="item" key={rev.id}>
         <Fade left>
           <img className="ui avatar image" src={rev.profile_photo_url} alt="" />
-          <div className="content">
-            <div className="header">{rev.author_name}</div>
-            <div className="description">
-              <div>{rev.text}</div>
-              <i> Rating: {rev.rating}</i>
+          <description>
+            <div className="content">
+              <div className="header">{rev.author_name}</div>
+              <div className="description">
+                <div>Source: {rev.tag}</div>
+                <div>{rev.text}</div>
+                <i> Rating: {rev.rating}</i>
+              </div>
             </div>
-          </div>
+          </description>
         </Fade>
       </div>
     );

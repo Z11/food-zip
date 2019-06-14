@@ -47,7 +47,7 @@ export const fetchReviewsFromOtherAPIs = location => async dispatch => {
       text: rev.text,
       author_name: rev.user.name,
       profile_photo_url: rev.user.image_url,
-      tag: "yelp"
+      tag: "Yelp"
     }));
 
     const filteredGoogleReviews = location.reviews.map(rev => ({
@@ -56,7 +56,7 @@ export const fetchReviewsFromOtherAPIs = location => async dispatch => {
       text: rev.text,
       author_name: rev.author_name,
       profile_photo_url: rev.profile_photo_url,
-      tag: "google"
+      tag: "Google"
     }));
 
     dispatch({
