@@ -1,30 +1,106 @@
 import jsonGoogleGeocoding from "../api/jsonGoogleGeocoding";
 import jsonYelp from "../api/jsonYelp";
 
-export const storeLocationInFavorites = location => (dispatch, getState) => {
-  if (getState().favorites.some(e => e.id === location.id)) {
-    dispatch({
-      type: "REMOVE_FAVORITE",
-      payload: location
-    });
-  } else {
-    dispatch({
-      type: "STORE_FAVORITE",
-      payload: location
-    });
-  }
-};
-
-export const fetchInformationFromOtherAPIs = location => async dispatch => {
+export const storeGooogleSvc = (google, service) => dispatch => {
   dispatch({
-    type: "SELECTED_LOCATION_DETAILS",
-    payload: location
+    type: "STORE_GOOGLE_SVC_OBJECTS",
+    payload: { google: google, service: service }
   });
-
-  await dispatch(fetchReviewsFromOtherAPIs(location));
 };
 
-export const fetchReviewsFromOtherAPIs = location => async dispatch => {
+export const fetchLocations = zipcode => async dispatch => {
+  const coordinates = await jsonGoogleGeocoding
+    .fromAddress(zipcode)
+    .catch(e => {
+      console.log(e);
+    });
+
+  await dispatch(fetchGoogleLocations(zipcode, coordinates));
+};
+
+export const fetchGoogleLocations = (zipcode, coordinates) => (
+  dispatch,
+  getState
+) => {
+  const request = {
+    location: coordinates.results[0].geometry.location,
+    radius: "1000",
+    type: "restaurant",
+    query: zipcode
+  };
+  return new Promise((resolve, reject) => {
+    getState().googleSvc.service.textSearch(request, (results, status) => {
+      if (
+        status !==
+        getState().googleSvc.google.maps.places.PlacesServiceStatus.OK
+      ) {
+        return reject(status);
+      } else {
+        resolve(results);
+      }
+    });
+  })
+    .then(results => {
+      dispatch({
+        type: "FETCH_LOCATIONS",
+        payload: results
+          .filter(loc => loc.formatted_address.includes(zipcode))
+          .sort((a, b) => b.rating - a.rating)
+      });
+    })
+    .catch(status => {
+      console.log("error fetching nearby", status);
+      dispatch({
+        type: "FETCH_LOCATIONS",
+        payload: "No Results"
+      });
+    });
+};
+
+export const fetchLocationDetailsFromAPIs = location => async (
+  dispatch,
+  getStatus
+) => {
+  await dispatch(fetchGoogleLocationDetails(location.place_id));
+  await dispatch(fetchReviewsFromAPIs(getStatus().selectedLocation));
+};
+
+export const fetchGoogleLocationDetails = placeId => async (
+  dispatch,
+  getState
+) => {
+  const sleep = milliseconds => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+  };
+  await sleep(400).then(() => {
+    return new Promise((resolve, reject) => {
+      getState().googleSvc.service.getDetails(
+        { placeId: placeId },
+        (results, status) => {
+          if (
+            status !==
+            getState().googleSvc.google.maps.places.PlacesServiceStatus.OK
+          ) {
+            return reject(status);
+          } else {
+            resolve(results);
+          }
+        }
+      );
+    })
+      .then(results => {
+        dispatch({
+          type: "SELECTED_LOCATION_DETAILS",
+          payload: results
+        });
+      })
+      .catch(status => {
+        console.log("error fetching nearby", status);
+      });
+  });
+};
+
+export const fetchReviewsFromAPIs = location => async dispatch => {
   const yelpLoc = await jsonYelp("businesses/search/phone", {
     phone: "+1" + location.formatted_phone_number.replace(/\D/g, "")
   });
@@ -103,30 +179,18 @@ export const fetchReviewsFromOtherAPIs = location => async dispatch => {
   }
 };
 
-export const fetchLocations = (zipcode, google, service) => async (
-  dispatch,
-  getState
-) => {
-  console.log("fetchCoordinates");
-  const coordinates = await jsonGoogleGeocoding
-    .fromAddress(zipcode)
-    .catch(e => {
-      console.log(e);
+export const storeLocationInFavorites = location => (dispatch, getState) => {
+  if (getState().favorites.some(e => e.id === location.id)) {
+    dispatch({
+      type: "REMOVE_FAVORITE",
+      payload: location
     });
-
-  console.log("fetchGoogleLocations");
-  await dispatch(fetchGoogleLocations(zipcode, coordinates, google, service));
-
-  const filteredLocations = getState().locations.filter(loc =>
-    loc.formatted_address.includes(zipcode)
-  );
-
-  console.log("fetchGoogleLocationDetails");
-  await asyncForEach(
-    filteredLocations,
-    async loc =>
-      await dispatch(fetchGoogleLocationDetails(loc.place_id, google, service))
-  );
+  } else {
+    dispatch({
+      type: "STORE_FAVORITE",
+      payload: location
+    });
+  }
 };
 
 export const resetStates = () => async dispatch => {
@@ -135,86 +199,3 @@ export const resetStates = () => async dispatch => {
     payload: ""
   });
 };
-
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
-}
-
-export const fetchGoogleLocationDetails = (
-  _placeId,
-  google,
-  service
-) => async dispatch => {
-  const sleep = milliseconds => {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
-  };
-  await sleep(400).then(() => {
-    return new Promise((resolve, reject) => {
-      service.getDetails({ placeId: _placeId }, (results, status) => {
-        if (status !== google.maps.places.PlacesServiceStatus.OK) {
-          return reject(status);
-        } else {
-          resolve(results);
-        }
-      });
-    })
-      .then(results => {
-        dispatch({
-          type: "FETCH_LOCATION_DETAILS",
-          payload: results
-        });
-      })
-      .catch(status => {
-        console.log("error fetching nearby", status);
-      });
-  });
-};
-
-export const fetchGoogleLocations = (
-  zipcode,
-  coordinates,
-  google,
-  service
-) => dispatch => {
-  const request = {
-    location: coordinates.results[0].geometry.location,
-    radius: "1000",
-    type: "restaurant",
-    query: zipcode
-  };
-  return new Promise((resolve, reject) => {
-    service.textSearch(request, (results, status) => {
-      if (status !== google.maps.places.PlacesServiceStatus.OK) {
-        return reject(status);
-      } else {
-        resolve(results);
-      }
-    });
-  })
-    .then(results => {
-      dispatch({
-        type: "FETCH_LOCATIONS",
-        payload: results
-      });
-    })
-    .catch(status => {
-      console.log("error fetching nearby", status);
-      dispatch({
-        type: "FETCH_LOCATIONS",
-        payload: "No Results"
-      });
-    });
-};
-
-//
-// const yelpfilteredLoc = await yelpLoc.data.businesses.filter(
-//   loc =>
-//     loc.name
-//       .replace(/\D\w\s!?]/g, "")
-//       .includes(location.name.replace(/\D\w\s!?]/g, "")) ||
-//     location.name
-//       .replace(/\D\w\s!?]/g, "")
-//       .includes(loc.name.replace(/\D\w\s!?]/g, ""))
-// );

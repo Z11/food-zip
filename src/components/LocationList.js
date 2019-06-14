@@ -33,7 +33,7 @@ const LocationList = ({ locations, favorites, button }) => {
 };
 
 const mapStateToProps = state => {
-  return { locations: state.locationsDetails, favorites: state.favorites };
+  return { locations: state.locations, favorites: state.favorites };
 };
 
 export default connect(mapStateToProps)(LocationList);

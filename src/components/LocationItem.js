@@ -1,10 +1,10 @@
 import React from "react";
-import { fetchInformationFromOtherAPIs } from "../actions/";
+import { fetchLocationDetailsFromAPIs } from "../actions/";
 import { connect } from "react-redux";
 
-const LocationItem = ({ location, fetchInformationFromOtherAPIs }) => {
+const LocationItem = ({ location, fetchLocationDetailsFromAPIs }) => {
   return (
-    <div onClick={() => fetchInformationFromOtherAPIs(location)}>
+    <div onClick={() => fetchLocationDetailsFromAPIs(location)}>
       <div className="item">
         <div className="header">{location.name}</div>
         <div className="description">
@@ -18,5 +18,5 @@ const LocationItem = ({ location, fetchInformationFromOtherAPIs }) => {
 
 export default connect(
   null,
-  { fetchInformationFromOtherAPIs }
+  { fetchLocationDetailsFromAPIs }
 )(LocationItem);
