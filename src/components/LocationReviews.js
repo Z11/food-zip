@@ -8,7 +8,7 @@ const LocationReviews = ({ reviews }) => {
       <div className="item" key={rev.id}>
         <Fade left>
           <img className="ui avatar image" src={rev.profile_photo_url} alt="" />
-          <description>
+          <div>
             <div className="content">
               <div className="header">{rev.author_name}</div>
               <div className="description">
@@ -17,7 +17,7 @@ const LocationReviews = ({ reviews }) => {
                 <i> Rating: {rev.rating}</i>
               </div>
             </div>
-          </description>
+          </div>
         </Fade>
       </div>
     );
