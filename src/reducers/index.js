@@ -19,9 +19,6 @@ const rootReducer = (state, action) => {
   if (action.type === "RESET_APP") {
     state.locations = undefined;
     state.locationsDetails = undefined;
-    state.reviews = undefined;
-    state.photos = undefined;
-    state.selectedLocation = undefined;
   }
   return appReducer(state, action);
 };

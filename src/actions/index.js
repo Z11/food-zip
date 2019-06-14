@@ -31,7 +31,23 @@ export const fetchReviewsFromOtherAPIs = location => async dispatch => {
 
   if (yelpLoc.data.businesses.length === 0) {
     console.log("Yelp Search - no results match phone number and name");
-    console.log(yelpLoc);
+    let x = 0;
+    const filteredGoogleReviews = location.reviews.map(rev => ({
+      id: x++,
+      rating: rev.rating,
+      text: rev.text,
+      author_name: rev.author_name,
+      profile_photo_url: rev.profile_photo_url,
+      tag: "Google"
+    }));
+    dispatch({
+      type: "FETCH_REVIEWS",
+      payload: filteredGoogleReviews.sort((a, b) => b.rating - a.rating)
+    });
+    dispatch({
+      type: "FETCH_PHOTOS",
+      payload: null
+    });
   } else {
     const yelpReviews = await jsonYelp(
       `businesses/${yelpLoc.data.businesses[0].id}/reviews`,
