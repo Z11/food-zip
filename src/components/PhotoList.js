@@ -4,8 +4,6 @@ import { connect } from "react-redux";
 import "./styles.css";
 
 const PhotoList = ({ photos }) => {
-  //<img alt="" src={require("../misc/test.jpg")} />
-
   const images = photos.map(image => {
     return <PhotoItem key={image.id} image={image} />;
   });
