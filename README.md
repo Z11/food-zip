@@ -1,3 +1,13 @@
+### Welcome to next YELP/GOOGLE FOOD SEARCH APP :D
+
+this application takes in a zip code and geolocates all HIGH rated restaurants in that area :)
+
+Keep in mind, that in order to use this app you will need to get api keys from yelp and google lol
+
+
+![image](https://user-images.githubusercontent.com/4098471/131791339-a9ce0211-d2e9-473a-bdad-224e53a52d6b.png)
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
